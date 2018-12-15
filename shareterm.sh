@@ -13,7 +13,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# version 1.1
+# version 1.2
 # prereqs: tmux and socat
 
 # If macports is installed, add it to the path	 
@@ -28,8 +28,7 @@ fi
 	 
 TMUX=$(which tmux)
 SOCAT=$(which socat)
-
-PSALL=$(ps ax)
+PSALL="ps ax"
 
 if [ -z "$TMUX" -o -z "$SOCAT" ]; then
 	echo Error!  This script requires tmux and socat to be installed and
@@ -65,19 +64,19 @@ fi
 
 SHARETERM_SESSION="shareterm-$1"
 
-existing_procs=$(PSALL | grep "$SHARETERM_SESSION" | grep "attach" | awk ' { print $1 }' )
+existing_procs=$(bash -c "$PSALL" | grep "$SHARETERM_SESSION" | grep "attach" | awk ' { print $1 }' )
 
 if [ ! -z "$existing_procs" ]; then
 	kill $existing_procs
 	sleep 1
 fi	
 
-existing_procs=$(PSALL | grep "$SHARETERM_SESSION" | grep "attach" | awk ' { print $1 }' )
+existing_procs=$(bash -c "$PSALL" | grep "$SHARETERM_SESSION" | grep "attach" | awk ' { print $1 }' )
 if [ ! -z "$existing_procs" ]; then
 	kill -9 $existing_procs
 fi
 
-existing_procs=$(PSALL | grep "$SHARETERM_SESSION" | grep "attach" | awk ' { print $1 }' )
+existing_procs=$(bash -c "$PSALL" | grep "$SHARETERM_SESSION" | grep "attach" | awk ' { print $1 }' )
 if [ ! -z "$existing_procs" ]; then
 	kill -9 $existing_procs
 fi
@@ -106,7 +105,7 @@ socat SYSTEM:"tmux attach -t $SHARETERM_SESSION",pty,stderr OPENSSL:$1:$2,$sslop
 socat_pid=$!
 sleep 1
 
-socat_running_still=$(ps ax | grep $socat_pid | grep -v grep | grep socat)
+socat_running_still=$(bash -c "$PSALL" | grep $socat_pid | grep -v grep | grep socat)
 if [ -z "$socat_running_still" ]; then
 	wait "$socat_pid"
 	socat_err=$?
@@ -147,9 +146,6 @@ MESSAGE
 'party, or do (n)othing?  [R/d/n] '
 				read a
 				a=$( echo $a | tr A-Z a-z )
-				if [ -z "$a" ]; then
-					a=r
-				fi
 			done
 
 			case $a in
